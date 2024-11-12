@@ -1,0 +1,105 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# Necessary libraries
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+library(ggplot2)
+theme_set(theme_bw())
+library(emmeans)
+library(multcomp)
+library(PLS205)
+library(lme4)
+library(lmerTest)
+library(multcompView)
+library(car)
+library(Rmisc) 
+library(dplyr) #https://r4ds.had.co.nz/ (Chapter 3, Chapter 5, look at filter and select)
+library(stringr) 
+library(readxl)
+library(writexl)
+library(ggpubr)
+```
+
+# Read file
+```{r}
+master <- read_excel("F_NF_Final _Zhang_Wrangle.xlsx", sheet=2)
+master$Sensor <- as.factor(master$Sensor)
+str(master)
+```
+
+# ggplot - all together
+
+```{r}
+ggplot(data=master, aes(x=ppm_hr, y=ppm_hr_licor, color=Sensor))+
+  geom_point()+
+  scale_x_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)
+```
+# ggplot - fan off all together
+
+
+```{r}
+ggplot(data=master%>% filter(Fan == "Off"), aes(x=ppm_hr, y=ppm_hr_licor, color=Sensor))+
+  geom_point()+
+  scale_x_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)
+```
+
+
+# ggplot - fan on all together
+
+
+```{r}
+ggplot(data=master%>% filter(Fan == "On"), aes(x=ppm_hr, y=ppm_hr_licor, color=Sensor))+
+  geom_point()+
+  scale_x_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)
+```
+
+# ggplot - fan off sensor 3
+
+```{r}
+ggplot(data=master%>% filter(Fan == "Off") %>% filter(Sensor =="3"), aes(x=ppm_hr, y=ppm_hr_licor, color=Sensor))+
+  geom_point()+
+  scale_x_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)
+```
+
+# ggplot - fan on sensor 3
+
+```{r}
+ggplot(data=master%>% filter(Fan == "On") %>% filter(Sensor =="3"), aes(x=ppm_hr, y=ppm_hr_licor, color=Sensor))+
+  geom_point()+
+  scale_x_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)
+```
+
+# ggplot - fan off sensor 13
+
+```{r}
+ggplot(data=master%>% filter(Fan == "Off") %>% filter(Sensor =="13"), aes(x=ppm_hr, y=ppm_hr_licor, color=Sensor))+
+  geom_point()+
+  scale_x_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)
+```
+
+# ggplot - fan off sensor 13
+
+```{r}
+ggplot(data=master%>% filter(Fan == "On") %>% filter(Sensor =="13"), aes(x=ppm_hr, y=ppm_hr_licor, color=Sensor))+
+  geom_point()+
+  scale_x_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 100), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)
+```
