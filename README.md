@@ -2,7 +2,7 @@
 
 Anthony John Macias <ajmacias@stanford.edu>
 
-Zhang Zhenglin <hcizhang@ucdavis.edu, zhangzhenglin2005@gmail.com>
+Zhang Zhenglin <hcizhang@ucdavis.edu>, <zhangzhenglin2005@gmail.com>
 
 Jonas Stage Sø <jonassoe@biology.sdu.dk>
 
