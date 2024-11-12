@@ -1,0 +1,155 @@
+---
+title: "Generating PPM Values for Cable Bacteria Study 2024"
+author: "Zhang Zhenglin"
+output:
+  pdf_document:
+    toc: yes
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+# Necessary libraries
+
+```{r message=FALSE,warning=FALSE}
+library(knitr)
+library(ggplot2)
+theme_set(theme_bw())
+library(emmeans)
+library(multcomp)
+library(PLS205)
+library(lme4)
+library(lmerTest)
+library(multcompView)
+library(car)
+library(Rmisc) 
+library(dplyr) #https://r4ds.had.co.nz/ (Chapter 3, Chapter 5, look at filter and select)
+# https://bookdown.org/ansellbr/WEHI_tidyR_course_book/
+library(stringr) 
+library(data.table)
+library(GGally)
+library(formatR)
+library(readxl)
+library(lubridate)
+library(openxlsx)
+library(Peak2PPM)
+library(writexl)
+
+```
+
+
+```{r}
+std <- read_excel("D:/Academics/UC Davis/School Work/Linquist Lab/Vincent/2024/LCMS PPM and Fluxes/Std_Input.xlsx", sheet =1)
+
+samples <- read_excel("D:/Academics/UC Davis/School Work/Linquist Lab/Vincent/2024/LCMS PPM and Fluxes/AllFieldMeasurements_Vincent_2024.xlsx", sheet =1)
+
+str(samples)
+str(std)
+
+table(samples$GC_Run)
+table(std$GC_Run)
+
+final_data <- peak2ppm(std, samples)
+
+str(final_data)
+```
+
+```{r}
+final_data <- final_data %>% 
+  select(-Sample_Gas3_ppm, 
+         -Sample_Gas3_Peak, 
+         -Sample_Gas2_ppm, 
+         -Sample_Gas2_Peak,
+         -Sample_Gas1_ppm, 
+         -Sample_Gas1_Peak, 
+         -Sample_CO2_ppm, 
+         -Sample_CO2_Peak,
+         )
+
+str(final_data)
+
+write_xlsx(final_data, "Field_Values_RCalibrated.xlsx")
+
+```
+
+
+# Trying out chatgpt
+
+```{r}
+library(purrr)
+library(tidyr)
+
+
+get_slope_and_r2 <- function(data) {
+  model <- lm(Sample_CH4_ppm ~ Time, data = data)
+  slope <- coef(model)["Time"]
+  r_squared <- summary(model)$r.squared
+  
+  # Check if R² is below threshold and print alert
+  if (r_squared < 0.85) {
+    cat("Warning: Low R² (", round(r_squared, 2), ") for Plot", unique(data$Plot), "on Date", unique(data$Date), "\n")
+  }
+  
+  # Return the slope and R² in a list
+  return(data.frame(Slope_ppm_per_min = slope, R_squared = r_squared))
+}
+
+# Apply function by Plot and Date
+results <- final_data %>%
+  group_by(Plot, Date) %>%
+  nest() %>%
+  mutate(model_results = map(data, get_slope_and_r2)) %>%
+  unnest(model_results) %>%
+  select(Plot, Date, Slope_ppm_per_min, R_squared)
+
+#multiple by 60 to get ppm per hour
+
+results$ppm_hour <- 60*(results$Slope_ppm_per_min)
+
+write_xlsx(results, "ppm_over_time.xlsx")
+
+selected_plots <- results %>%
+  filter(Plot %in% c("C-1", "S-M-W-2", "C-S-1", "C-2", "C-S-MD-1", "S-M-2"))
+
+table(results$Plot)
+
+
+write_xlsx(selected_plots, "LCMS_selected_plotsppm_over_time.xlsx")
+
+```
+
+# Check a linear regression
+
+Looked good. I checked the slope for SMW1 for all 3 dates and it is the same as above. Yay to generative AI. 
+
+```{r}
+
+testing <- final_data %>% 
+  filter(Date >= as.POSIXct("2024-06-26") & Date <= as.POSIXct("2024-06-28")) %>%
+  filter(Plot == "S-M-W-1")
+
+str(testing)
+
+summary(lm(Sample_CH4_ppm~Time, data = testing))
+
+table(final_data$Date)
+
+testing_2 <- final_data %>% 
+  filter(Date >= as.POSIXct("2024-07-26") & Date <= as.POSIXct("2024-08-2")) %>%
+  filter(Plot == "S-M-W-1")
+
+str(testing_2)
+
+summary(lm(Sample_CH4_ppm~Time, data = testing_2))
+
+testing_3 <- final_data %>% 
+  filter(Date >= as.POSIXct("2024-08-26") & Date <= as.POSIXct("2024-08-28")) %>%
+  filter(Plot == "S-M-W-1")
+
+str(testing_3)
+
+summary(lm(Sample_CH4_ppm~Time, data = testing_3))
+
+```
+
+
