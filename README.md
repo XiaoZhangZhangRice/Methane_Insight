@@ -1,6 +1,6 @@
 # Contributors
 
-Anthony John Macias <ajmacias@stanford.edu>
+Anthony John Macias <ajmacias@stanford.edu>, <ajmacias@alumni.stanford.edu>
 
 Zhang Zhenglin <hcizhang@ucdavis.edu>, <zhangzhenglin2005@gmail.com>
 
