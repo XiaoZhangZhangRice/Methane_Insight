@@ -1,0 +1,116 @@
+---
+title: "GC measurements"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# Necessary libraries
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+library(ggplot2)
+theme_set(theme_bw())
+library(emmeans)
+library(multcomp)
+library(PLS205)
+library(lme4)
+library(lmerTest)
+library(multcompView)
+library(car)
+library(Rmisc) 
+library(dplyr) #https://r4ds.had.co.nz/ (Chapter 3, Chapter 5, look at filter and select)
+library(stringr) 
+library(readxl)
+library(writexl)
+library(ggpubr)
+```
+
+# Read file
+```{r}
+master <- read_excel("RES _LCMS_GC.xlsx", sheet=1)
+master$Sensor <- as.factor(master$Sensor)
+
+fan_off <- master %>% 
+        select(-LCMS_ppm_hr_fan_on)  %>% 
+        na.omit(master)
+
+fan_on <- na.omit(master)%>% 
+        select(-LCMS_ppm_hr)
+
+
+no_cable_bacteria <- master[11:63,]
+
+str(master)
+```
+
+# ggplot - fan off
+
+```{r}
+all_plotted <-
+ggplot(data=fan_off, aes(x=LCMS_ppm_hr, y=GC_ppm_hr))+
+  geom_point(aes(color=Sensor))+
+  scale_x_continuous(limits = c(-0, 149), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 149), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)+
+  stat_regline_equation(aes(x=LCMS_ppm_hr, y=GC_ppm_hr, 
+    label =  paste(..rr.label..)),
+    show.legend = FALSE, 
+    label.x = 75,
+    label.y = 45)+
+  stat_regline_equation(aes(x=LCMS_ppm_hr, y=GC_ppm_hr, 
+    label = paste(..eq.label..)),
+    show.legend = FALSE, 
+    label.x = 75, 
+    label.y = 50)+
+  geom_smooth(data=fan_off, aes(x=LCMS_ppm_hr, y=GC_ppm_hr),method="lm", level = 0.95)+
+  ggtitle("(a) Fan off")
+  
+
+all_plotted
+
+summary(lm(GC_ppm_hr~LCMS_ppm_hr, data =fan_off)) #coefficents are the same, y=mx+c and r2
+```
+# ggplot - fan on
+
+```{r}
+all_plotted_fan_on <-
+ggplot(data=fan_on, aes(x=LCMS_ppm_hr_fan_on, y=GC_ppm_hr))+
+  geom_point(aes(color=Sensor))+
+  scale_x_continuous(limits = c(-0, 149), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 149), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)+
+  stat_regline_equation(aes(x=LCMS_ppm_hr_fan_on, y=GC_ppm_hr, 
+    label =  paste(..rr.label..)),
+    show.legend = FALSE, 
+    label.x = 75,
+    label.y = 45)+
+  stat_regline_equation(aes(x=LCMS_ppm_hr_fan_on, y=GC_ppm_hr, 
+    label = paste(..eq.label..)),
+    show.legend = FALSE, 
+    label.x = 75, 
+    label.y = 50)+
+  geom_smooth(data=fan_on, aes(x=LCMS_ppm_hr_fan_on, y=GC_ppm_hr),method="lm", level = 0.95)+
+  ggtitle("(b) Fan on")
+  
+
+all_plotted_fan_on
+
+summary(lm(GC_ppm_hr~LCMS_ppm_hr_fan_on, data =fan_on)) #coefficents are the same, y=mx+c and r2
+```
+
+# save the plot 
+
+```{r}
+combined <- ggarrange(all_plotted,all_plotted_fan_on,
+                 nrow = 2,
+                 ncol =1,
+                 common.legend = TRUE,
+                 legend= "bottom")
+
+ggsave(filename = "all_plotted.jpg",  # Include the file extension here
+       plot = combined,              # Specify the plot
+       #path = "D:/Academics/UC Davis/School Work/Linquist Lab/Data/R stats/Agronomic paper/Figures",
+       dpi = 400,
+       height = 32, width = 18, units = "cm")
+```
+

@@ -1,0 +1,28 @@
+
+TY  - JOUR
+T1  - Self-Made Equipment for Automatic Methane Diffusion and Ebullition Measurements From Aquatic Environments
+AU  - Sø, Jonas Stage
+AU  - Sand-Jensen, Kaj
+AU  - Kragh, Theis
+Y1  - 2024/06/01
+PY  - 2024
+DA  - 2024/06/01
+DO  - https://doi.org/10.1029/2024JG008035
+T2  - Journal of Geophysical Research: Biogeosciences
+JF  - Journal of Geophysical Research: Biogeosciences
+JO  - Journal of Geophysical Research: Biogeosciences
+JA  - J Geophys Res Biogeosci
+SP  - e2024JG008035
+VL  - 129
+IS  - 6
+KW  - greenhouse gas
+KW  - methane (CH4)
+KW  - carbon dioxide (CO2)
+KW  - sensor
+KW  - flux chamber
+PB  - John Wiley & Sons, Ltd
+SN  - 2169-8953
+UR  - https://doi.org/10.1029/2024JG008035
+Y2  - 2024/11/13
+N2  - Abstract Freshwater ecosystems are believed to account for about half of global methane emissions, but this estimate is uncertain due to few measurements in some geographical regions and most important for our purposes, large local variations. We propose a simple, cheap (<200?), and effective solution to the urgent need for equipment that can provide accurate data on methane emission at high spatial and temporal resolution for many days, across many ecosystems and regions, and with limited inspection. A low-cost metal oxide semiconductor sensor, placed in a floating chamber equipped with an air pump to flush the chamber's headspace at regular intervals, provides frequent and accurate high-resolution measurements of diffusive and ebullitive methane emissions from lakes and rivers. We made several improvements that yield more useful data and enable the setup to operate for several days without visual inspection. To test the accuracy of the equipment, we compared its measurements of methane emission to parallel measurements by an expensive, commercially available laser sensor. The correspondence was excellent (R2 ≥ 0.94) and the deviation of measurements was minimal at fluxes within ranges encountered in the field. We also designed an R-package (FluxSeparator), which associates the large sensor-generated data sets with diffusive and ebullitive flux activity. Both the sensor setup and the R-package are flexible and have been made publicly available to encourage others to use and further improve the equipment and calculations.
+ER  - 

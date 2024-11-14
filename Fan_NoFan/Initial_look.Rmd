@@ -1,5 +1,5 @@
 ---
-title: "R Notebook"
+title: "Fan and no fan effect on LCMS measurements"
 output:
   pdf_document: default
   html_notebook: default
@@ -45,11 +45,13 @@ ggplot(data=master, aes(x=ppm_hr, y=ppm_hr_licor, color=Sensor))+
 
 
 ```{r}
+fan_off <-
 ggplot(data=master%>% filter(Fan == "Off"), aes(x=ppm_hr, y=ppm_hr_licor, color=Sensor))+
   geom_point()+
   scale_x_continuous(limits = c(-0, 100), expand = c(0, 0))+
   scale_y_continuous(limits = c(-0, 100), expand = c(0, 0))+
-  geom_abline(intercept = 0, slope = 1)
+  geom_abline(intercept = 0, slope = 1)+
+  ggtitle("Fan off")
 ```
 
 
@@ -57,11 +59,27 @@ ggplot(data=master%>% filter(Fan == "Off"), aes(x=ppm_hr, y=ppm_hr_licor, color=
 
 
 ```{r}
+fan_on <-
 ggplot(data=master%>% filter(Fan == "On"), aes(x=ppm_hr, y=ppm_hr_licor, color=Sensor))+
   geom_point()+
   scale_x_continuous(limits = c(-0, 100), expand = c(0, 0))+
   scale_y_continuous(limits = c(-0, 100), expand = c(0, 0))+
-  geom_abline(intercept = 0, slope = 1)
+  geom_abline(intercept = 0, slope = 1)+
+  ggtitle("Fan On")
+```
+
+# Combine into one graph 
+```{r}
+all <- ggarrange(fan_off,fan_on,
+                 nrow = 1,
+                               common.legend = TRUE,
+                               legend= "bottom")
+
+
+ggsave(filename = "all.jpg",  # Include the file extension here
+       plot = all,              # Specify the plot
+       dpi = 400,
+       height = 10, width = 20, units = "cm")
 ```
 
 # ggplot - fan off sensor 3
@@ -71,8 +89,11 @@ ggplot(data=master%>% filter(Fan == "Off") %>% filter(Sensor =="3"), aes(x=ppm_h
   geom_point()+
   scale_x_continuous(limits = c(-0, 100), expand = c(0, 0))+
   scale_y_continuous(limits = c(-0, 100), expand = c(0, 0))+
-  geom_abline(intercept = 0, slope = 1)
+  geom_abline(intercept = 0, slope = 1)+
+  ggtitle("Fan off")
 ```
+
+
 
 # ggplot - fan on sensor 3
 
@@ -94,7 +115,7 @@ ggplot(data=master%>% filter(Fan == "Off") %>% filter(Sensor =="13"), aes(x=ppm_
   geom_abline(intercept = 0, slope = 1)
 ```
 
-# ggplot - fan off sensor 13
+# ggplot - fan on sensor 13
 
 ```{r}
 ggplot(data=master%>% filter(Fan == "On") %>% filter(Sensor =="13"), aes(x=ppm_hr, y=ppm_hr_licor, color=Sensor))+
