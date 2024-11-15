@@ -31,14 +31,16 @@ master <- read_excel("RES _LCMS_GC.xlsx", sheet=1)
 master$Sensor <- as.factor(master$Sensor)
 
 fan_off <- master %>% 
-        select(-LCMS_ppm_hr_fan_on)  %>% 
-        na.omit(master)
+        select(-LCMS_ppm_hr_fan_on, -LCMS_ppm_hr_3point)  %>% 
+        na.omit()
 
-fan_on <- na.omit(master)%>% 
-        select(-LCMS_ppm_hr)
+fan_on <- master %>% 
+        select(-LCMS_ppm_hr, -LCMS_ppm_hr_3point)  %>% 
+        na.omit()
 
-
-no_cable_bacteria <- master[11:63,]
+three_point <- master %>% 
+        select(-LCMS_ppm_hr, -LCMS_ppm_hr_fan_on)  %>% 
+        na.omit()
 
 str(master)
 ```
@@ -46,7 +48,7 @@ str(master)
 # ggplot - fan off
 
 ```{r}
-all_plotted <-
+all_plotted_fan_off <-
 ggplot(data=fan_off, aes(x=LCMS_ppm_hr, y=GC_ppm_hr))+
   geom_point(aes(color=Sensor))+
   scale_x_continuous(limits = c(-0, 149), expand = c(0, 0))+
@@ -66,7 +68,7 @@ ggplot(data=fan_off, aes(x=LCMS_ppm_hr, y=GC_ppm_hr))+
   ggtitle("(a) Fan off")
   
 
-all_plotted
+all_plotted_fan_off
 
 summary(lm(GC_ppm_hr~LCMS_ppm_hr, data =fan_off)) #coefficents are the same, y=mx+c and r2
 ```
@@ -98,11 +100,39 @@ all_plotted_fan_on
 summary(lm(GC_ppm_hr~LCMS_ppm_hr_fan_on, data =fan_on)) #coefficents are the same, y=mx+c and r2
 ```
 
+# ggplot - three point
+
+```{r}
+all_plotted_three_point <-
+ggplot(data=three_point, aes(x=LCMS_ppm_hr_3point, y=GC_ppm_hr))+
+  geom_point(aes(color=Sensor))+
+  scale_x_continuous(limits = c(-0, 149), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 149), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)+
+  stat_regline_equation(aes(x=LCMS_ppm_hr_3point, y=GC_ppm_hr, 
+    label =  paste(..rr.label..)),
+    show.legend = FALSE, 
+    label.x = 75,
+    label.y = 45)+
+  stat_regline_equation(aes(x=LCMS_ppm_hr_3point, y=GC_ppm_hr, 
+    label = paste(..eq.label..)),
+    show.legend = FALSE, 
+    label.x = 75, 
+    label.y = 50)+
+  geom_smooth(data=three_point, aes(x=LCMS_ppm_hr_3point, y=GC_ppm_hr),method="lm", level = 0.95)+
+  ggtitle("(c) Three point")
+  
+
+all_plotted_three_point
+
+summary(lm(GC_ppm_hr~LCMS_ppm_hr_3point, data =three_point)) #coefficents are the same, y=mx+c and r2
+```
+
 # save the plot 
 
 ```{r}
-combined <- ggarrange(all_plotted,all_plotted_fan_on,
-                 nrow = 2,
+combined <- ggarrange(all_plotted_fan_off,all_plotted_fan_on,all_plotted_three_point,
+                 nrow = 3,
                  ncol =1,
                  common.legend = TRUE,
                  legend= "bottom")
@@ -111,6 +141,6 @@ ggsave(filename = "all_plotted.jpg",  # Include the file extension here
        plot = combined,              # Specify the plot
        #path = "D:/Academics/UC Davis/School Work/Linquist Lab/Data/R stats/Agronomic paper/Figures",
        dpi = 400,
-       height = 32, width = 18, units = "cm")
+       height = 36, width = 13.5, units = "cm")
 ```
 
