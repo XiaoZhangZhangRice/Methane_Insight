@@ -1,0 +1,5 @@
+
+SN: 20240004
+Software version: 3.0
+
+millis,stampunix,datetime,RH,tempC,CH4smV, CH4rmV, VbatmV, K33_RH, K33_Temp, K33_CO2, SampleNumber, PumpCycle
