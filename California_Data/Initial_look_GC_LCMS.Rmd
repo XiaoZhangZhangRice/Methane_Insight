@@ -45,7 +45,7 @@ three_point <- master %>%
 str(master)
 ```
 
-# ggplot - fan off
+# fan off
 
 ```{r}
 all_plotted_fan_off <-
@@ -72,7 +72,24 @@ all_plotted_fan_off
 
 summary(lm(GC_ppm_hr~LCMS_ppm_hr, data =fan_off)) #coefficents are the same, y=mx+c and r2
 ```
-# ggplot - fan on
+# fan off transformed
+
+```{r}
+lm_fan_off <- lm(GC_ppm_hr~LCMS_ppm_hr, data =fan_off)
+
+fan_off$fan_off_predicted_ppm <- predict(lm_fan_off, fan_off)
+
+all_plotted_fan_off_predicted <-
+ggplot(data=fan_off, aes(x=fan_off_predicted_ppm, y=GC_ppm_hr))+
+  geom_point(aes(color=Sensor))+
+  scale_x_continuous(limits = c(-0, 149), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 149), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)+
+  geom_smooth(data=fan_off, aes(x=fan_off_predicted_ppm, y=GC_ppm_hr),method="lm", level = 0.95)+
+  ggtitle("(b) Fan off predicted")
+```
+
+# fan on
 
 ```{r}
 all_plotted_fan_on <-
@@ -92,7 +109,8 @@ ggplot(data=fan_on, aes(x=LCMS_ppm_hr_fan_on, y=GC_ppm_hr))+
     label.x = 75, 
     label.y = 50)+
   geom_smooth(data=fan_on, aes(x=LCMS_ppm_hr_fan_on, y=GC_ppm_hr),method="lm", level = 0.95)+
-  ggtitle("(b) Fan on")
+  ggtitle("Fan on")+
+  theme(legend.position="bottom")
   
 
 all_plotted_fan_on
@@ -100,7 +118,7 @@ all_plotted_fan_on
 summary(lm(GC_ppm_hr~LCMS_ppm_hr_fan_on, data =fan_on)) #coefficents are the same, y=mx+c and r2
 ```
 
-# ggplot - three point
+# three point
 
 ```{r}
 all_plotted_three_point <-
@@ -128,12 +146,32 @@ all_plotted_three_point
 summary(lm(GC_ppm_hr~LCMS_ppm_hr_3point, data =three_point)) #coefficents are the same, y=mx+c and r2
 ```
 
-# save the plot 
+# three point transformed
 
 ```{r}
-combined <- ggarrange(all_plotted_fan_off,all_plotted_fan_on,all_plotted_three_point,
-                 nrow = 3,
-                 ncol =1,
+lm_three_point <- lm(GC_ppm_hr~LCMS_ppm_hr_3point, data =three_point)
+
+three_point$three_point_predicted_ppm <- predict(lm_three_point, three_point)
+
+all_plotted_three_point_predicted <-
+ggplot(data=three_point, aes(x=three_point_predicted_ppm, y=GC_ppm_hr))+
+  geom_point(aes(color=Sensor))+
+  scale_x_continuous(limits = c(-0, 149), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-0, 149), expand = c(0, 0))+
+  geom_abline(intercept = 0, slope = 1)+
+  geom_smooth(data=three_point, aes(x=three_point_predicted_ppm, y=GC_ppm_hr),method="lm", level = 0.95)+
+  ggtitle("(d) Three point predicted")
+```
+
+# save the plots 
+
+```{r}
+combined <- ggarrange(all_plotted_fan_off,
+                      all_plotted_fan_off_predicted,
+                      all_plotted_three_point,
+                      all_plotted_three_point_predicted,
+                 nrow = 2,
+                 ncol =2,
                  common.legend = TRUE,
                  legend= "bottom")
 
@@ -141,6 +179,12 @@ ggsave(filename = "all_plotted.jpg",  # Include the file extension here
        plot = combined,              # Specify the plot
        #path = "D:/Academics/UC Davis/School Work/Linquist Lab/Data/R stats/Agronomic paper/Figures",
        dpi = 400,
-       height = 36, width = 13.5, units = "cm")
+       height = 21, width = 20, units = "cm")
+
+ggsave(filename = "fan_on.jpg",  # Include the file extension here
+       plot = all_plotted_fan_on,              # Specify the plot
+       #path = "D:/Academics/UC Davis/School Work/Linquist Lab/Data/R stats/Agronomic paper/Figures",
+       dpi = 400,
+       height = 16, width = 15, units = "cm")
 ```
 
