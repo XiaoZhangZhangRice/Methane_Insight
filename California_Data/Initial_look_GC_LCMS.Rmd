@@ -64,8 +64,12 @@ ggplot(data=fan_off, aes(x=LCMS_ppm_hr, y=GC_ppm_hr))+
     show.legend = FALSE, 
     label.x = 75, 
     label.y = 50)+
-  geom_smooth(data=fan_off, aes(x=LCMS_ppm_hr, y=GC_ppm_hr),method="lm", level = 0.95)+
-  ggtitle("(a) Fan off")
+ # ggtitle("(a) Fan off")+
+   ggtitle("(a) Linear regression")+
+   labs(y = expression("ΔC"[GC] * "(ppm hr"^-1 * ")"),
+       x = expression("ΔC"[MLCS] * "(ppm hr"^-1 * ")")) +
+  geom_smooth(data=fan_off, aes(x=LCMS_ppm_hr, y=GC_ppm_hr),method="lm", level = 0.95)
+  
   
 
 all_plotted_fan_off
@@ -89,7 +93,10 @@ ggplot(data=fan_off, aes(x=fan_off_predicted_ppm, y=GC_ppm_hr))+
   scale_y_continuous(limits = c(-0, 149), expand = c(0, 0))+
   geom_abline(intercept = 0, slope = 1)+
   geom_smooth(data=fan_off, aes(x=fan_off_predicted_ppm, y=GC_ppm_hr),method="lm", level = 0.95)+
-  ggtitle("(b) Fan off predicted")+
+  #ggtitle("(b) Fan off predicted")+
+  ggtitle("(b) Predicted")+
+  labs(y = expression("ΔC"[GC] * "(ppm hr"^-1 * ")"),
+       x = expression("ΔC"[MLCS] * "(ppm hr"^-1 * ")")) +
   annotate("text", x=50, y=100, 
            label = paste("Pearson's Correlation =", 
                          round(cor(fan_off$GC_ppm_hr, fan_off$fan_off_predicted_ppm, method = "pearson"), 2)))
@@ -107,13 +114,15 @@ fan_off_histogram <-
 ggplot(fan_off, aes(x = diff)) + 
   geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
   labs(
-    x = "Difference in ΔC (ppm/hr, predicted MLCS - GC)",  # Rename x-axis
+    x = expression("Difference in ΔC (ppm hr"^-1 * ", predicted MLCS - GC)"),
+    #"Difference in ΔC (ppm/hr, predicted MLCS - GC)",  # Rename x-axis
     y = "Frequency"
   ) +
   scale_x_continuous(breaks = c(round(center_value_fan_off, 2), 30, -30,-60,60), limits = c(-60,60))+
   geom_vline(xintercept = center_value_fan_off, linetype = "dashed", color = "red", size = 1.5)+
-  theme_minimal()+
-  ggtitle("(c) Fan off: Difference distribution")
+   #ggtitle("(c) Fan off: Difference distribution")+
+  ggtitle("(c) Difference distribution")+
+  theme_minimal()
 
 
 cor.test(fan_off$GC_ppm_hr,fan_off$fan_off_predicted_ppm, method = "pearson")
@@ -250,5 +259,24 @@ ggsave(filename = "fan_on.jpg",  # Include the file extension here
        #path = "D:/Academics/UC Davis/School Work/Linquist Lab/Data/R stats/Agronomic paper/Figures",
        dpi = 400,
        height = 16, width = 15, units = "cm")
+
+
+combined_exit_seminar <- ggarrange(all_plotted_fan_off,
+                      #all_plotted_three_point,
+                      all_plotted_fan_off_predicted,
+                      #all_plotted_three_point_predicted,
+                      fan_off_histogram,
+                     # three_point_histogram,
+                 nrow = 1,
+                 ncol =3,
+                 common.legend = TRUE,
+                 legend= "bottom")
+
+ggsave(filename = "all_plotted_exit_seminar.jpg",  # Include the file extension here
+       plot = combined_exit_seminar,              # Specify the plot
+       #path = "D:/Academics/UC Davis/School Work/Linquist Lab/Data/R stats/Agronomic paper/Figures",
+       dpi = 400,
+       height = 12, width = 30, units = "cm")
+
 ```
 
