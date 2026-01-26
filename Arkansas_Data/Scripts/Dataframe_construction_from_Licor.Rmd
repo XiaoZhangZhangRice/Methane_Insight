@@ -1,0 +1,87 @@
+---
+title: "Data_Frame_Construction"
+author: "Zhang Zhenglin"
+output:
+  pdf_document:
+    toc: yes
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+
+# Brief overview
+
+The team at the University of Arkansas used the LiCor to measure changes in CH4 concentrations. Here, we use the original files to create a blank excel sheet that we use to fill in with the MI sensor slopes (ppm hr-1).
+
+There were two sites, Keaton and Mitchell. 
+
+# Necessary libraries
+
+```{r message=FALSE,warning=FALSE}
+library(knitr)
+library(ggplot2)
+theme_set(theme_bw())
+library(emmeans)
+library(multcomp)
+library(PLS205)
+library(lme4)
+library(lmerTest)
+library(multcompView)
+library(car)
+library(Rmisc) 
+library(dplyr) #https://r4ds.had.co.nz/ (Chapter 3, Chapter 5, look at filter and select)
+# https://bookdown.org/ansellbr/WEHI_tidyR_course_book/
+library(stringr) 
+library(data.table)
+library(GGally)
+library(formatR)
+library(readxl)
+library(FluxCalR)
+library(tidyverse)
+library(fuzzyjoin)
+library(purrr)
+library(data.table)
+library(broom)
+library(lubridate)
+library(readxl)
+library(openxlsx)
+library(ggrepel)
+library(gridExtra)
+```
+
+# Keaton data
+
+```{r}
+
+Keaton <- excel_sheets("../Data/R15 Keaton_Time Series_raw.xlsx") %>%
+  map_df(~ read_excel("../Data/R15 Keaton_Time Series_raw.xlsx", sheet = .x), .id = "Sheet") %>% 
+  mutate(location = "Keaton")
+
+str(Keaton)
+
+```
+# Mitchell
+
+```{r}
+Mitchell <- excel_sheets("../Data/R8 Mitchell_Time Series.xlsx") %>%
+  map_df(~ read_excel("../Data/R8 Mitchell_Time Series.xlsx", sheet = .x), .id = "Sheet") %>% 
+  mutate(location = "Mitchell")
+
+str(Mitchell)
+```
+# Combine and create dataframe
+
+```{r}
+all_licor <- rbind(Mitchell,Keaton)
+
+
+result <- all_licor %>%
+  mutate(Date = as.Date(DATE_TIME)) %>%        # extract Date
+  distinct(Collar, location, Date, Replicate) %>%  # keep only unique combos
+  arrange(Date) %>%                             # sort by Date (or use DATE_TIME if you want exact time)
+  mutate(MI_slope = NA_real_)  
+
+write.xlsx(result, file= "../Data/All_measurements_empty.xlsx", sheetName = "1", rowNames = FALSE)
+```
+
