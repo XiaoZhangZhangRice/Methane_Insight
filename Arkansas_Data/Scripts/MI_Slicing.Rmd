@@ -1,0 +1,111 @@
+---
+title: "MI_Slicing"
+author: "Zhang Zhenglin"
+output:
+  pdf_document:
+    toc: yes
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+
+# Brief overview
+
+The methane insight sensor data was compiled into one massive excel file. To be able to generate ppm hr-1 slopes, These data points need to be sliced into day by day files with a specific format suitable for the shiny app. 
+
+# Necessary libraries
+
+```{r message=FALSE,warning=FALSE}
+library(knitr)
+library(ggplot2)
+theme_set(theme_bw())
+library(emmeans)
+library(multcomp)
+library(PLS205)
+library(lme4)
+library(lmerTest)
+library(multcompView)
+library(car)
+library(Rmisc) 
+library(dplyr) #https://r4ds.had.co.nz/ (Chapter 3, Chapter 5, look at filter and select)
+# https://bookdown.org/ansellbr/WEHI_tidyR_course_book/
+library(stringr) 
+library(data.table)
+library(GGally)
+library(formatR)
+library(readxl)
+library(FluxCalR)
+library(tidyverse)
+library(fuzzyjoin)
+library(purrr)
+library(data.table)
+library(broom)
+library(lubridate)
+library(readxl)
+library(openxlsx)
+library(ggrepel)
+library(gridExtra)
+```
+
+# Read excel
+
+Remove the unneeded first few rows, then change the datetime column to POSIXct
+
+```{r}
+field <- read_excel(
+  "../Data/MI_Sensor_All.xlsx", 
+  sheet = 1,
+  skip = 3
+)
+
+field <- field %>%
+  dplyr::mutate(Date = as.POSIXct(
+    datetime,
+    format = "%Y/%m/%d %H:%M:%S",
+    tz = "UTC"
+  ))
+
+str(field)
+```
+# Customised loop to slice by each day and add the sensor number
+
+```{r}
+# create a Date-only column
+field <- field %>%
+  mutate(Date_only = as.Date(Date))
+
+# loop over each unique date
+for (d in unique(field$Date_only)) {
+
+  # subset data for that date
+  df_day <- field %>%
+    filter(Date_only == d) %>%
+    select(-Date_only)
+
+  # file name
+file_name <- paste0(
+  "../MI_Excel_Outputs/MI_Data_",
+  format(as.Date(d), "%d_%m_%Y"),
+  ".csv"
+)
+
+  # write header lines
+  write_lines(
+    c(
+      "SN: 20240008",
+      "Software version: 3.0",
+      ""  # blank line so data starts on row 4
+    ),
+    file_name
+  )
+
+  # append the dataframe starting at row 4
+  write_csv(
+    df_day,
+    file_name,
+    append = TRUE
+  )
+}
+```
+
