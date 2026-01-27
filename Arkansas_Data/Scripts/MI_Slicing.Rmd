@@ -53,10 +53,10 @@ library(gridExtra)
 Remove the unneeded first few rows, then change the datetime column to POSIXct
 
 ```{r}
-field <- read_excel(
-  "../Data/MI_Sensor_All.xlsx", 
-  sheet = 1,
-  skip = 3
+field <- read_csv(
+  "../Data/MI_Full_datalog.csv",
+  skip = 3,
+  #col_types = rep("guess", 13)
 )
 
 field <- field %>%
@@ -85,7 +85,7 @@ for (d in unique(field$Date_only)) {
 
   # file name
 file_name <- paste0(
-  "../MI_Excel_Outputs/MI_Data_",
+  "../MI_Excel_Outputs/MI_Data_", d,"_",
   format(as.Date(d), "%d_%m_%Y"),
   ".csv"
 )

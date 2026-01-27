@@ -50,6 +50,34 @@ library(ggrepel)
 library(gridExtra)
 ```
 
+# All Data
+
+```{r}
+all_licor_raw <- read_csv(
+  "../Data/ch4_all_measurement_points_licor_2024-2025.csv",
+)
+
+str(all_licor_raw)
+```
+
+# Create dataframe to input MI slopes
+
+```{r}
+result <- all_licor_raw %>%
+  mutate(Date = as.Date(DATE_TIME)) %>%         # extract Date
+  arrange(DATE_TIME) %>%                             # sort by Date (or use DATE_TIME if you want exact time)
+  filter(
+    DATE_TIME >= as.POSIXct("2024-01-01", tz = "UTC"),
+    DATE_TIME <  as.POSIXct("2025-06-01", tz = "UTC")
+  )%>%
+  distinct(Date, Field, Collar, Replicate) %>%  # keep only unique combos
+  mutate(MI_slope = NA_real_)  
+
+write.xlsx(result, file= "../Data/All_measurements_empty.xlsx", sheetName = "1", rowNames = FALSE)
+```
+
+
+
 # Keaton data
 
 ```{r}
@@ -76,12 +104,12 @@ str(Mitchell)
 all_licor <- rbind(Mitchell,Keaton)
 
 
-result <- all_licor %>%
+result <- all_licor_raw %>%
   mutate(Date = as.Date(DATE_TIME)) %>%        # extract Date
   distinct(Collar, location, Date, Replicate) %>%  # keep only unique combos
   arrange(Date) %>%                             # sort by Date (or use DATE_TIME if you want exact time)
   mutate(MI_slope = NA_real_)  
 
-write.xlsx(result, file= "../Data/All_measurements_empty.xlsx", sheetName = "1", rowNames = FALSE)
+#write.xlsx(result, file= "../Data/All_measurements_empty.xlsx", sheetName = "1", rowNames = FALSE)
 ```
 
