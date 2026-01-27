@@ -1,0 +1,58 @@
+---
+title: "Comparison"
+author: "Zhang Zhenglin"
+output:
+  pdf_document:
+    toc: yes
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+# Brief overview
+
+# Necessary libraries
+
+```{r message=FALSE,warning=FALSE}
+library(knitr)
+library(ggplot2)
+theme_set(theme_bw())
+library(emmeans)
+library(multcomp)
+library(PLS205)
+library(lme4)
+library(lmerTest)
+library(multcompView)
+library(car)
+library(Rmisc) 
+library(dplyr) #https://r4ds.had.co.nz/ (Chapter 3, Chapter 5, look at filter and select)
+# https://bookdown.org/ansellbr/WEHI_tidyR_course_book/
+library(stringr) 
+library(data.table)
+library(GGally)
+library(formatR)
+library(readxl)
+library(FluxCalR)
+library(tidyverse)
+library(fuzzyjoin)
+library(purrr)
+library(data.table)
+library(broom)
+library(lubridate)
+library(readxl)
+library(openxlsx)
+library(ggrepel)
+library(gridExtra)
+```
+
+# Read excel
+
+Remove the unneeded first few rows, then change the datetime column to POSIXct
+
+```{r}
+filled <- read_excel("../Data/All_MI_measurements_FILLED_27Jan.xlsx", sheet=1)
+
+sum(filled$MI_slope  == "na", na.rm = TRUE)
+
+557-141
+```
