@@ -67,13 +67,13 @@ result <- all_licor_raw %>%
   mutate(Date = as.Date(DATE_TIME)) %>%         # extract Date
   arrange(DATE_TIME) %>%                             # sort by Date (or use DATE_TIME if you want exact time)
   filter(
-    DATE_TIME >= as.POSIXct("2024-01-01", tz = "UTC"),
+    DATE_TIME >= as.POSIXct("2024-07-29", tz = "UTC"),
     DATE_TIME <  as.POSIXct("2025-06-01", tz = "UTC")
   )%>%
   distinct(Date, Field, Collar, Replicate) %>%  # keep only unique combos
   mutate(MI_slope = NA_real_)  
 
-write.xlsx(result, file= "../Data/All_measurements_empty.xlsx", sheetName = "1", rowNames = FALSE)
+write.xlsx(result, file= "../Data/All_MI_measurements_empty.xlsx", sheetName = "1", rowNames = FALSE)
 ```
 
 
