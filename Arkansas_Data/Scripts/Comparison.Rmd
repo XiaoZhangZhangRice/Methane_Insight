@@ -11,6 +11,14 @@ editor_options:
 
 # Brief overview
 
+There are two base data files. Here we define slope as the change in concentration over time (ΔC/ΔT).
+We compare here, the slopes between the MI sensor and the Li-Cor 7810. The slopes from each of the instruments
+are recorded in a single file. 
+
+The main aim of the this script is to 
+1) Combine these two datasets into a data frame via unique matching using a set of variables such that the measurements from the same chamber are part of one observation or row. 
+2) Perform basic statistical analyses to evaluate if the measurements obtained are comparable
+
 # Necessary libraries
 
 ```{r message=FALSE,warning=FALSE}
@@ -43,16 +51,115 @@ library(readxl)
 library(openxlsx)
 library(ggrepel)
 library(gridExtra)
+library(ggpubr)
 ```
 
-# Read excel
+# Read excel and clean dataframe from MI
 
-Remove the unneeded first few rows, then change the datetime column to POSIXct
+All slopes here were manually extracted. Where the researchers were unsure if the slope matched a particular observation, 
+or if the sensor appeared to not be recording good data, the data point was saved as "na" (variable class: chr). 
+
+Before removing "na", we have a total of 557 observations. After removing "na" we are left with 416 observations.
 
 ```{r}
-filled <- read_excel("../Data/All_MI_measurements_FILLED_27Jan.xlsx", sheet=1)
+MI_slopes <- read_excel("../Data/All_MI_measurements_FILLED_27Jan.xlsx", sheet=1)
 
-sum(filled$MI_slope  == "na", na.rm = TRUE)
+sum(MI_slopes$MI_slope  == "na", na.rm = TRUE)
 
-557-141
+557-sum(MI_slopes$MI_slope  == "na", na.rm = TRUE) # number of observations left
+
+MI_slopes <- MI_slopes %>%
+  filter(tolower(MI_slope) != "na") %>% #remove datapoints that we are not confident of 
+  select(-6) # this col is not need (used for basic inter rater reliabilty test)
+  
+
+MI_slopes <- MI_slopes %>%
+  mutate(
+    MI_slope = as.numeric(MI_slope),
+    across(where(is.character), as.factor)
+  ) #%>%
+    #filter(MI_slope <15)
+
+
+str(MI_slopes)
 ```
+
+
+# Read excel and clean dataframe from Li-Cor
+
+All slopes automatically computed. The vast majority of measurements were 3 mins long. The first 30s was removed as a deadband. 
+
+Afterwards, the rest of the points were used to calculate slopes. 
+
+Here, we do a quality control step. We removed observations with R2 values lower than 0.85. 
+
+```{r}
+LiCor_slopes <- read_excel("../Data/ch4_slopes_licor_2024-2025.xlsx", sheet=1)
+
+LiCor_slopes <- LiCor_slopes %>%
+  filter(r2 > 0.95) %>%
+  mutate(across(where(is.character), as.factor))# %>%
+ # filter(slope_ppm_per_h >10) %>%
+ # filter(slope_ppm_per_h <75)
+
+
+
+
+str(LiCor_slopes)
+```
+# Combine the two dataframes via unique matching
+
+```{r}
+
+Combined <- MI_slopes %>%
+  left_join(
+    LiCor_slopes %>%
+      select(Field, Collar, Replicate, DATE,
+             slope_ppm_per_h, n_points, r2),
+    by = c("Field", "Collar", "Replicate", "DATE")
+  ) %>%
+  mutate(LiCor_slope =slope_ppm_per_h)
+
+Combined <- na.omit(Combined)
+
+
+Combined <- Combined %>%
+dplyr::mutate(Year = factor(format(DATE, "%Y"))) %>%
+dplyr::mutate(Month_Year = factor(format(DATE, "%b %Y")))
+
+str(Combined)
+```
+
+
+
+# Initial visualisation
+
+```{r}
+ggplot(data=Combined, aes(x=MI_slope, y=LiCor_slope))+
+  geom_point()+
+  #aes(color=Year)+
+  geom_abline(intercept = 0, slope = 1)+
+  #scale_x_continuous(limits = c(-10, 50), expand = c(0, 0))+
+  #scale_y_continuous(limits = c(-1, 149), expand = c(0, 0))+
+  stat_regline_equation(aes(x=MI_slope, y=LiCor_slope, 
+    label =  paste(..rr.label..)),
+    show.legend = FALSE, 
+    label.x = 20,
+    label.y = 20)+
+  stat_regline_equation(aes(x=MI_slope, y=LiCor_slope, 
+    label = paste(..eq.label..)),
+    show.legend = FALSE, 
+    label.x = 20, 
+    label.y = 25)+
+   ggtitle("Linear regression")+
+   labs(y = expression("ΔC"[Li-Cor] * "(ppm hr"^-1 * ")"),
+       x = expression("ΔC"[MLCS] * "(ppm hr"^-1 * ")")) +
+  geom_smooth(data=Combined, aes(x=MI_slope, y=LiCor_slope),method="lm", level = 0.95)
+```
+
+```{r}
+cor.test(Combined$MI_slope,Combined$LiCor_slope, method = "pearson")
+```
+
+
+# Clustering 
