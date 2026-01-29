@@ -136,7 +136,9 @@ str(Combined)
 # Initial visualisation
 
 ```{r}
-ggplot(data=Combined, aes(x=MI_slope, y=LiCor_slope))+
+
+Combined_everything <-
+  ggplot(data=Combined, aes(x=MI_slope, y=LiCor_slope))+
   geom_point()+
   #aes(color=Year)+
   geom_abline(intercept = 0, slope = 1)+
@@ -152,10 +154,12 @@ ggplot(data=Combined, aes(x=MI_slope, y=LiCor_slope))+
     show.legend = FALSE, 
     label.x = 20, 
     label.y = 25)+
-   #ggtitle("Linear regression")+
+   ggtitle("(a) All observations")+
    labs(y = expression("ΔC"[Li-Cor] * "(ppm hr"^-1 * ")"),
        x = expression("ΔC"[MLCS] * "(ppm hr"^-1 * ")")) +
   geom_smooth(data=Combined, aes(x=MI_slope, y=LiCor_slope),method="lm", level = 0.95)
+
+Combined_everything
 ```
 
 
@@ -178,17 +182,20 @@ ggplot(data=Combined, aes(x=MI_slope, y=LiCor_slope))+
 # Initial visualisation (by month_year)
 
 ```{r}
-ggplot(data=Combined, aes(x=MI_slope, y=LiCor_slope))+
+Month_Year_Plot <-
+  ggplot(data=Combined, aes(x=MI_slope, y=LiCor_slope))+
   geom_point()+
   aes(color=Month_Year)+
   geom_abline(intercept = 0, slope = 1)+
   #scale_x_continuous(limits = c(-10, 50), expand = c(0, 0))+
   #scale_y_continuous(limits = c(-1, 149), expand = c(0, 0))+
   
-   #ggtitle("Linear regression")+
+   ggtitle("(b) All observations by Month_Year")+
    labs(y = expression("ΔC"[Li-Cor] * "(ppm hr"^-1 * ")"),
        x = expression("ΔC"[MLCS] * "(ppm hr"^-1 * ")")) 
   #geom_smooth(data=Combined, aes(x=MI_slope, y=LiCor_slope),method="lm", level = 0.95)
+
+Month_Year_Plot
 ```
 
 ```{r}
@@ -253,9 +260,67 @@ plot(2:10, silhouette_score, type='b' )
 k_clusts<-kmeans(scale(Combined[,c(5,9)]), centers=5, nstart = 100)
 Combined$k_clusts_3<-factor(k_clusts$cluster)
 
+Cluster <- 
 ggplot(Combined, aes(x=MI_slope, y=LiCor_slope))+
-geom_point(aes(col=k_clusts_3), size=2)
+geom_point(aes(col=k_clusts_3), size=2)+
+  ggtitle("(c) K-Means clustering (5 clusters)")
+
+Cluster
+
 ```
+# Look only at Rep 2 due to longer retention time
+
+```{r}
+Combined_Rep2 <- Combined %>% filter(Replicate == "Rep2") 
+
+Rep2 <- 
+  ggplot(data=Combined_Rep2, aes(x=MI_slope, y=LiCor_slope))+
+  geom_point()+
+  #aes(color=Month_Year)+
+  geom_abline(intercept = 0, slope = 1)+
+  scale_x_continuous(limits = c(-50, 50), expand = c(0, 0))+
+  scale_y_continuous(limits = c(-20, 150), expand = c(0, 0))+
+  stat_regline_equation(aes(x=MI_slope, y=LiCor_slope, 
+    label =  paste(..rr.label..)),
+    show.legend = FALSE, 
+    label.x = 20,
+    label.y = 20)+
+  stat_regline_equation(aes(x=MI_slope, y=LiCor_slope, 
+    label = paste(..eq.label..)),
+    show.legend = FALSE, 
+    label.x = 20, 
+    label.y = 25)+
+   ggtitle("(d) Rep 2 only")+
+   labs(y = expression("ΔC"[Li-Cor] * "(ppm hr"^-1 * ")"),
+       x = expression("ΔC"[MLCS] * "(ppm hr"^-1 * ")")) 
+ # geom_smooth(data=Combined_Rep2, aes(x=MI_slope, y=LiCor_slope),method="lm", level = 0.95)
+
+Rep2
+```
+
+
+# Combine all necessary graphs
+
+
+
+```{r}
+Combined_ALL <- ggarrange(Combined_everything,
+                          Month_Year_Plot,
+                    Cluster,
+                    Rep2,
+                    nrow = 2,
+                               ncol = 2
+                               )
+
+ggsave(filename = "Combined_ALL.jpg",  # Include the file extension here
+       plot = Combined_ALL,              # Specify the plot
+       path = "../Figures",
+       dpi = 400,
+       height = 40, width = 40, units = "cm")
+
+```
+
+
 # Difference across time
 
 ```{r}
@@ -383,6 +448,21 @@ RH
 
 ggsave(filename = "RH_over_time.jpg",  # Include the file extension here
        plot = RH,              # Specify the plot
+       path = "../Figures",
+       dpi = 400,
+       height = 20, width = 40, units = "cm")
+```
+# Combine RH and TempC
+
+```{r}
+RH_Temp <- ggarrange(RH,
+                    Temp,
+                    nrow = 1,
+                               ncol = 2
+                               )
+
+ggsave(filename = "RH_Temp.jpg",  # Include the file extension here
+       plot = RH_Temp,              # Specify the plot
        path = "../Figures",
        dpi = 400,
        height = 20, width = 40, units = "cm")
