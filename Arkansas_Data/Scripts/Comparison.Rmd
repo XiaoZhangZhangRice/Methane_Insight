@@ -208,7 +208,7 @@ cor.test(Combined$MI_slope,Combined$LiCor_slope, method = "pearson")
 Combined_middle_ground <-  Combined %>%
   filter(slope_ppm_per_h >10) %>%
   filter(slope_ppm_per_h <75) %>%
-  filter(MI_slope <12)
+  filter(MI_slope <10)
 ```
 
 
