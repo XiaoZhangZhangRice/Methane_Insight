@@ -103,9 +103,6 @@ LiCor_slopes <- LiCor_slopes %>%
  # filter(slope_ppm_per_h >10) %>%
  # filter(slope_ppm_per_h <75)
 
-
-
-
 str(LiCor_slopes)
 ```
 # Combine the two dataframes via unique matching
@@ -129,6 +126,10 @@ dplyr::mutate(Year = factor(format(DATE, "%Y"))) %>%
 dplyr::mutate(Month_Year = factor(format(DATE, "%b %Y")))
 
 str(Combined)
+
+
+write_xlsx(Combined, "all_combined.xlsx")
+
 ```
 
 
