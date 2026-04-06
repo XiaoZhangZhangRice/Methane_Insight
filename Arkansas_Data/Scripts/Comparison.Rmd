@@ -53,6 +53,8 @@ library(ggrepel)
 library(gridExtra)
 library(ggpubr)
 library(cluster)
+library(writexl)
+
 ```
 
 # Read excel and clean dataframe from MI
@@ -128,7 +130,7 @@ dplyr::mutate(Month_Year = factor(format(DATE, "%b %Y")))
 str(Combined)
 
 
-write_xlsx(Combined, "all_combined.xlsx")
+write_xlsx(Combined, "../Data/all_combined.xlsx")
 
 ```
 
